@@ -1,0 +1,144 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using MudBlazor
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="MyCustomTheme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+	<MudAppBar Elevation="1">
+		<AuthorizeView>
+			<Authorized>
+				<MudIconButton Icon="@Icons.Material.Filled.Menu" Edge="Edge.Start"
+					OnClick="@((e) => DrawerToggle())" />
+			</Authorized>
+		</AuthorizeView>
+		<img src="images/logo500.png" asp-append-version="true" width="150px" />
+		<MudSpacer />
+		<AuthorizeView>
+			<Authorized>
+				<MudAvatar>
+					<MudImage Src="https://mudblazor.com/images/mony.jpg"></MudImage>
+				</MudAvatar>
+				<MudButton @onclick="Logout" EndIcon="@Icons.Material.Filled.Logout">Log out</MudButton>
+			</Authorized>
+			<NotAuthorized>
+				<MudButton Href="authentication/login" StartIcon="@Icons.Material.Filled.Login">Log in</MudButton>
+			</NotAuthorized>
+		</AuthorizeView>
+	</MudAppBar>
+	<AuthorizeView>
+		<Authorized>
+			<MudDrawer @bind-Open="@_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+				<MudNavMenu Class="ma-2">
+					<NavMenu />
+				</MudNavMenu>
+			</MudDrawer>
+		</Authorized>
+	</AuthorizeView>
+	<MudMainContent>
+		<MudContainer>
+			<MudPaper Class="pa-8 ma-2 max-w-xl">
+				@Body
+			</MudPaper>
+		</MudContainer>
+	</MudMainContent>
+</MudLayout>
+
+@code {
+	MudTheme MyCustomTheme = new MudTheme()
+	{
+		PaletteLight = new PaletteLight()
+		{
+			Black = Colors.Shades.Black,
+			White = Colors.Shades.Black,
+
+			Primary = Colors.Blue.Darken4,
+			TextPrimary = Colors.Shades.Black,
+			PrimaryContrastText = Colors.Shades.White,
+			Secondary = Colors.Red.Lighten5,
+			TextSecondary = Colors.Shades.Black,
+			SecondaryContrastText = Colors.Shades.White,
+
+			Background = Colors.Gray.Lighten4,
+			DrawerBackground = Colors.Blue.Darken4,
+			AppbarBackground = Colors.Shades.White,
+			DrawerText = Colors.Shades.White,
+			DrawerIcon = Colors.Shades.White,
+			ActionDefault = Colors.Shades.Black,
+		},
+		PaletteDark = new PaletteDark()
+		{
+			Primary = Colors.Blue.Lighten1
+		},
+		Typography = new Typography()
+		{
+			Default = new DefaultTypography()
+			{
+				FontFamily = new[] { "Montserrat", "sans-serif" }
+			},
+			H1 = new H6Typography()
+			{
+				FontSize = "2.25rem",
+			},
+			H2 = new H6Typography()
+			{
+				FontSize = "2rem",
+			},
+			H3 = new H6Typography()
+			{
+				FontSize = "1.75rem",
+			},
+			H4 = new H6Typography()
+			{
+				FontSize = "1.5rem",
+			},
+			H5 = new H6Typography()
+			{
+				FontSize = "1.25rem",
+			},
+			H6 = new H6Typography()
+			{
+				FontSize = "1rem",
+			}
+		},
+		LayoutProperties = new LayoutProperties()
+		{
+			DrawerWidthLeft = "260px",
+			DrawerWidthRight = "300px",
+		}
+	};
+
+	bool _drawerOpen = true;
+
+	bool authenticated;
+	string? userName;
+
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await authenticationStateTask;
+		var user = authState.User;
+		authenticated = user.Identity?.IsAuthenticated ?? false;
+		if (authenticated)
+		{
+			userName = user.Identity?.Name;
+		}
+	}
+	private void Logout(MouseEventArgs args)
+	{
+		NavigationManager.NavigateToLogout("authentication/logout");
+	}
+	void DrawerToggle()
+	{
+		_drawerOpen = !_drawerOpen;
+	}
+}

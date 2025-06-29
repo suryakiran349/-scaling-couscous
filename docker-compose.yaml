@@ -1,0 +1,83 @@
+services:
+  app.client:
+    container_name: Client
+    image: app.client
+    build:
+      context: .
+      dockerfile: Client.Dockerfile
+    ports:
+      - "5002:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+
+  app.server:
+    container_name: Server
+    image: app.server
+    build:
+      context: .
+      dockerfile: Server.Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      - app.database
+      - blobstorage
+    volumes:
+      - ./:/app
+
+  app.database:
+    container_name: app.database
+    image: postgres:17.4
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - app-db:/var/lib/postgresql/data
+
+  keycloak.database:
+    container_name: keycloak.database
+    image: postgres:17.4
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: keycloak
+    ports:
+      - "5434:5432"
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+
+  keycloak:
+    image: keycloak/keycloak:26.1
+    container_name: keycloak
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: 123
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak.database:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: 123
+      KC_FEATURES: organization,admin-fine-grained-authz
+    ports:
+      - "8180:8080"
+    command: start-dev
+    depends_on:
+      - keycloak.database
+
+  blobstorage:
+    container_name: blobstorage
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --location /workspace --debug /workspace/debug.log"
+    ports:
+      - 10010:10000
+      - 10011:10001
+      - 10012:10002
+    volumes:
+      - ./.containers/blob_storage/data:/workspace
+
+volumes:
+  keycloak-db:
+  app-db:
