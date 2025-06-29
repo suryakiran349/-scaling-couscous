@@ -10,8 +10,6 @@ variable "resource_group_name" {
   default     = "nationohrg"
 }
 
-
-
 variable "github_actions_service_principal_object_id" {
   description = "Object ID of the GitHub Actions service principal for Key Vault access"
   type        = string
