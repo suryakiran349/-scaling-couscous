@@ -12,7 +12,8 @@ fi
 SUBSCRIPTION_ID=ce851b7b-7bc7-4917-9352-0ce88dec94d5
 TENANT_ID=797f4846-ba00-4fd7-ba43-dac1f8f63013
 APP_NAME="scaling-oidc"
-GITHUB_REPO="https://github.com/suryakiran349/-scaling-couscous"
+# Use org/repo format for GITHUB_REPO, not full URL
+GITHUB_REPO=$4
 
 # 1. Create Azure AD App Registration (or use existing)
 APP_ID=$(az ad app create --display-name "$APP_NAME" --query appId -o tsv)
@@ -53,10 +54,12 @@ az ad app federated-credential create --id "$APP_ID" \
   --parameters '{
     "name": "github-oidc",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:'"$GITHUB_REPO"':ref:refs/heads/*",
+    "subject": "repo:'"$GITHUB_REPO"':ref:refs/heads/main",
     "description": "GitHub Actions OIDC for $GITHUB_REPO",
     "audiences": ["api://AzureADTokenExchange"]
   }'
+
+
 echo "✅ Added federated credential."
 
 # 7. Output GitHub secrets
