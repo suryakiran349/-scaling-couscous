@@ -15,7 +15,10 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
-  subscription_id = ""
+  # OIDC authentication for GitHub Actions
+  use_oidc = true
+  # The following environment variables must be set by your CI/CD pipeline:
+  # ARM_CLIENT_ID, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID
 }
 
 resource "azurerm_resource_group" "rg" {
