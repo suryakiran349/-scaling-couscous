@@ -27,3 +27,6 @@ image_tags = {
 
 # Application Gateway Configuration
 app_gateway_sku_tier = "WAF_v2"
+
+# Subscription ID
+subscription_id = "ce851b7b-7bc7-4917-9352-0ce88dec94d5"

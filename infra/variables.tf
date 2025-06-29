@@ -119,3 +119,8 @@ variable "app_gateway_sku_tier" {
   default     = "Standard_v2"
 }
 
+variable "subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
+}
+

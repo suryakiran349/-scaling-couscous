@@ -17,6 +17,7 @@ provider "azurerm" {
   }
   # OIDC authentication for GitHub Actions
   use_oidc = true
+  subscription_id = var.subscription_id
   # The following environment variables must be set by your CI/CD pipeline:
   # ARM_CLIENT_ID, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID
 }
