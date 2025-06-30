@@ -15,11 +15,7 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
-  # OIDC authentication for GitHub Actions
-  use_oidc        = true
-  subscription_id = var.subscription_id
-  # The following environment variables must be set by your CI/CD pipeline:
-  # ARM_CLIENT_ID, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID
+  subscription_id = ""
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -49,7 +45,7 @@ resource "azurerm_user_assigned_identity" "container_apps_identity" {
   location            = var.location
 }
 
-# Get current Azure client config
+# Get current Azure client config 
 data "azurerm_client_config" "current" {}
 
 
@@ -82,7 +78,7 @@ module "storage" {
   source               = "./modules/storage"
   location             = var.location
   resource_group_name  = azurerm_resource_group.rg.name
-  storage_account_name = "vsuryastg"
+  storage_account_name = "${var.resource_group_name}storage"
   vnet_id              = module.networking.vnet_id
   subnet_ids           = module.networking.subnets_ids
   key_vault_id         = module.secrets.key_vault_id
@@ -133,11 +129,11 @@ module "containers" {
   container_memory           = var.container_memory
   container_env_name         = "${var.resource_group_name}env"
 
-  # Managed identity
+  # Managed identity 
   container_apps_identity_id = azurerm_user_assigned_identity.container_apps_identity.id
   keycloak_identity_id       = azurerm_user_assigned_identity.uai_keycloak.id
 
-  # API Server
+  # API Server 
   server_container_app_name = "${var.resource_group_name}server"
 
   # Server environment variables
@@ -155,7 +151,7 @@ module "containers" {
   keycloak_db_username_secret_id    = module.secrets.keycloak_db_username_secret_id
   keycloak_db_password_secret_id    = module.secrets.keycloak_db_password_secret_id
 
-  # Frontend
+  # Frontend 
   frontend_container_app_name = "${var.resource_group_name}frontend"
   api_url                     = "https://${var.resource_group_name}-gateway.${var.location}.cloudapp.azure.com/api"
   keycloak_url                = "https://${var.resource_group_name}-gateway.${var.location}.cloudapp.azure.com/auth"
@@ -242,5 +238,3 @@ module "test_vm" {
 
   depends_on = [module.networking]
 }
-
-# All resources and modules
