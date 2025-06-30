@@ -154,12 +154,13 @@ jobs:
         else
           echo "Plan failed, checking if it's due to state lock..."
           
-          # Check if the failure is specifically due to state lock
-          if terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" 2>&1 | grep -q "state is locked"; then
+          # Check if the failure is specifically due to state lock (multiple possible messages)
+          PLAN_OUTPUT=$(terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" 2>&1)
+          if echo "$PLAN_OUTPUT" | grep -q -E "(state is locked|state blob is already locked|Error acquiring the state lock)"; then
             echo "State lock detected. Attempting to resolve..."
             
-            # Extract lock ID and force unlock
-            LOCK_ID=$(terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" 2>&1 | grep "Lock ID:" | awk '{print $3}' || echo "")
+            # Extract lock ID from the output
+            LOCK_ID=$(echo "$PLAN_OUTPUT" | grep "ID:" | awk '{print $2}' | head -1)
             if [ ! -z "$LOCK_ID" ]; then
               echo "Unlocking state with Lock ID: $LOCK_ID"
               terraform force-unlock -force "$LOCK_ID"
@@ -168,17 +169,19 @@ jobs:
               echo "Retrying plan after unlock..."
               terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan
             else
-              echo "Could not extract Lock ID - trying local cleanup..."
+              echo "Could not extract Lock ID from output:"
+              echo "$PLAN_OUTPUT"
+              echo "Trying local cleanup..."
               rm -f .terraform.lock.hcl
-              terraform init -backend-config="key=${{ steps.vars.outputs.TF_STATE_KEY }}" -upgrade
+              terraform init -backend-config="key=${{ steps.vars.outputs.TF_STATE_KEY }}"
               terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan
             fi
           else
-            echo "Plan failed for reasons other than state lock"
+            echo "Plan failed for reasons other than state lock:"
+            echo "$PLAN_OUTPUT"
             exit 1
           fi
         fi
-
     - name: Terraform Apply
       if: (steps.changes.outputs.HAS_INFRA_CHANGES == 'true' || github.event_name == 'workflow_dispatch') && steps.vars.outputs.TF_ACTION == 'apply'
       working-directory: ./infra
