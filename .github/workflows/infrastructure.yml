@@ -150,34 +150,43 @@ jobs:
         echo "Running terraform plan..."
         # Try normal plan first
         if terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan; then
-          echo "Plan completed successfully"
+          echo "✅ Plan completed successfully"
         else
-          echo "Plan failed, checking if it's due to state lock..."
+          echo "❌ Plan failed, checking if it's due to state lock..."
           
-          # Check if the failure is specifically due to state lock (multiple possible messages)
+          # Capture the output for debugging
           PLAN_OUTPUT=$(terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" 2>&1)
+          echo "🔍 Debug - Full output:"
+          echo "$PLAN_OUTPUT"
+          echo "🔍 Debug - Checking for lock patterns..."
+          
           if echo "$PLAN_OUTPUT" | grep -q -E "(state is locked|state blob is already locked|Error acquiring the state lock)"; then
-            echo "State lock detected. Attempting to resolve..."
+            echo "🔒 State lock detected. Attempting to resolve..."
             
-            # Extract lock ID from the output
-            LOCK_ID=$(echo "$PLAN_OUTPUT" | grep "ID:" | sed 's/^[[:space:]]*ID:[[:space:]]*//' | head -1)
+            # Debug the lock ID extraction
+            echo "🔍 Debug - Looking for ID line..."
+            echo "$PLAN_OUTPUT" | grep "ID:"
+            
+            # Extract lock ID from the output - simplified approach
+            LOCK_ID=$(echo "$PLAN_OUTPUT" | grep "ID:" | sed 's/.*ID:[[:space:]]*//' | head -1)
+            echo "🔍 Debug - Extracted Lock ID: '$LOCK_ID'"
+            
             if [ ! -z "$LOCK_ID" ]; then
-              echo "Unlocking state with Lock ID: $LOCK_ID"
+              echo "🔓 Unlocking state with Lock ID: $LOCK_ID"
               terraform force-unlock -force "$LOCK_ID"
               
               # Retry plan after unlock
-              echo "Retrying plan after unlock..."
+              echo "🔄 Retrying plan after unlock..."
               terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan
             else
-              echo "Could not extract Lock ID from output:"
-              echo "$PLAN_OUTPUT"
+              echo "⚠️ Could not extract Lock ID from output"
               echo "Trying local cleanup..."
               rm -f .terraform.lock.hcl
               terraform init -backend-config="key=${{ steps.vars.outputs.TF_STATE_KEY }}"
               terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan
             fi
           else
-            echo "Plan failed for reasons other than state lock:"
+            echo "❌ Plan failed for reasons other than state lock:"
             echo "$PLAN_OUTPUT"
             exit 1
           fi
