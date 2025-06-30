@@ -125,8 +125,7 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "frontend-health-probe"
-    pick_host_name_from_backend_address = false
-    host_name                           = var.frontend_fqdn
+    pick_host_name_from_backend_address = true  # ✅ FIXED: Let App Gateway resolve host name
   }
 
   backend_http_settings {
@@ -136,8 +135,7 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "api-health-probe"
-    pick_host_name_from_backend_address = false
-    host_name                           = var.api_fqdn
+    pick_host_name_from_backend_address = true  # ✅ FIXED: Let App Gateway resolve host name
   }
 
   backend_http_settings {
@@ -147,11 +145,10 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "auth-health-probe"
-    pick_host_name_from_backend_address = false
-    host_name                           = var.auth_fqdn
+    pick_host_name_from_backend_address = true  # ✅ FIXED: Let App Gateway resolve host name
   }
 
-  # Health probes
+  # Health probes - FIXED for 502 errors
   probe {
     name                                      = "frontend-health-probe"
     protocol                                  = "Http"
@@ -165,7 +162,7 @@ resource "azurerm_application_gateway" "app_gateway" {
   probe {
     name                                      = "api-health-probe"
     protocol                                  = "Http"
-    path                                      = "/health"
+    path                                      = "/api-health"  # ✅ FIXED: Correct API health endpoint
     interval                                  = 30
     timeout                                   = 30
     unhealthy_threshold                       = 3
@@ -175,7 +172,7 @@ resource "azurerm_application_gateway" "app_gateway" {
   probe {
     name                                      = "auth-health-probe"
     protocol                                  = "Http"
-    path                                      = "/health/live"
+    path                                      = "/health/ready"  # ✅ FIXED: Correct Keycloak health endpoint
     interval                                  = 30
     timeout                                   = 30
     unhealthy_threshold                       = 3
