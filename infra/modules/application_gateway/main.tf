@@ -125,7 +125,8 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "frontend-health-probe"
-    pick_host_name_from_backend_address = true  # ✅ FIXED: Let App Gateway resolve host name
+    pick_host_name_from_backend_address = false
+    host_name                           = var.frontend_fqdn
   }
 
   backend_http_settings {
@@ -135,7 +136,8 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "api-health-probe"
-    pick_host_name_from_backend_address = true  # ✅ FIXED: Let App Gateway resolve host name
+    pick_host_name_from_backend_address = false
+    host_name                           = var.api_fqdn
   }
 
   backend_http_settings {
@@ -145,7 +147,8 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "auth-health-probe"
-    pick_host_name_from_backend_address = true  # ✅ FIXED: Let App Gateway resolve host name
+    pick_host_name_from_backend_address = false
+    host_name                           = var.auth_fqdn
   }
 
   # Health probes - FIXED for 502 errors

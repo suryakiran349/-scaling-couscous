@@ -5,7 +5,7 @@ resource "azurerm_container_app_environment" "container_env" {
   resource_group_name            = var.resource_group_name
   log_analytics_workspace_id     = var.log_analytics_workspace_id
   infrastructure_subnet_id       = var.subnet_id
-  internal_load_balancer_enabled = false  # ✅ FIXED: Allow external access via Application Gateway
+  internal_load_balancer_enabled = true  # ✅ FIXED: Use internal LB to avoid public IP limit
 
   workload_profile {
     name                  = "Consumption"

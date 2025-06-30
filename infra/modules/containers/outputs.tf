@@ -1,9 +1,9 @@
 output "container_app_urls" {
   description = "URLs of the container apps"
   value = {
-    server   = azurerm_container_app.api_server.ingress[0].fqdn
-    keycloak = azurerm_container_app.keycloak_server.ingress[0].fqdn
-    frontend = azurerm_container_app.frontend.ingress[0].fqdn
+    server   = azurerm_container_app.api_server.latest_revision_fqdn
+    keycloak = azurerm_container_app.keycloak_server.latest_revision_fqdn
+    frontend = azurerm_container_app.frontend.latest_revision_fqdn
   }
 }
 
