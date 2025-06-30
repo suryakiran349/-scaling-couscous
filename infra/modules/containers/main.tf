@@ -150,7 +150,7 @@ resource "azurerm_container_app" "keycloak_server" {
       image  = "quay.io/keycloak/keycloak:${var.image_tags.keycloak}"
       cpu    = 0.5
       memory = "1Gi"
-      args   = ["start", "--optimized"]
+      args   = ["start"]
 
       env {
         name        = "KC_BOOTSTRAP_ADMIN_USERNAME"
