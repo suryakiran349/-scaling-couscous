@@ -148,16 +148,17 @@ jobs:
       working-directory: ./infra
       run: |
         echo "Running terraform plan..."
-        # Try normal plan first
-        if terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan; then
+        # Capture output while running the plan
+        echo "🔍 Running terraform plan and capturing output..."
+        PLAN_OUTPUT=$(terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan 2>&1)
+        PLAN_EXIT_CODE=$?
+        
+        if [ $PLAN_EXIT_CODE -eq 0 ]; then
           echo "✅ Plan completed successfully"
         else
-          echo "❌ Plan failed, checking if it's due to state lock..."
+          echo "❌ Plan failed with exit code $PLAN_EXIT_CODE, checking if it's due to state lock..."
           echo "🔍 Starting lock detection logic..."
           
-          # Capture the output for debugging
-          echo "🔍 Capturing terraform output..."
-          PLAN_OUTPUT=$(terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" 2>&1)
           echo "🔍 Debug - Full output:"
           echo "$PLAN_OUTPUT"
           echo "🔍 Debug - Checking for lock patterns..."
@@ -197,6 +198,7 @@ jobs:
             exit 1
           fi
         fi
+        
     - name: Terraform Apply
       if: (steps.changes.outputs.HAS_INFRA_CHANGES == 'true' || github.event_name == 'workflow_dispatch') && steps.vars.outputs.TF_ACTION == 'apply'
       working-directory: ./infra
