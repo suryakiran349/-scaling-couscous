@@ -148,10 +148,12 @@ jobs:
       working-directory: ./infra
       run: |
         echo "Running terraform plan..."
-        # Capture output while running the plan
+        # Capture output while running the plan (disable exit on error for this command)
         echo "🔍 Running terraform plan and capturing output..."
+        set +e  # Temporarily disable exit on error
         PLAN_OUTPUT=$(terraform plan -var-file="${{ steps.vars.outputs.TF_VAR_FILE }}" -out=tfplan 2>&1)
         PLAN_EXIT_CODE=$?
+        set -e  # Re-enable exit on error
         
         if [ $PLAN_EXIT_CODE -eq 0 ]; then
           echo "✅ Plan completed successfully"
