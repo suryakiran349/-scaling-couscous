@@ -96,13 +96,24 @@ resource "azurerm_container_app" "api_server" {
       }
 
       liveness_probe {
-        path                    = "/health"
+        path                    = "/api-health"
+        port                    = 8080
+        transport               = "HTTP"
+        initial_delay           = 60
+        interval_seconds        = 30
+        timeout                 = 15
+        failure_count_threshold = 5
+      }
+
+      readiness_probe {
+        path                    = "/api-health"
         port                    = 8080
         transport               = "HTTP"
         initial_delay           = 30
-        interval_seconds        = 30
+        interval_seconds        = 15
         timeout                 = 10
         failure_count_threshold = 3
+        success_count_threshold = 1
       }
     }
   }
@@ -211,15 +222,38 @@ resource "azurerm_container_app" "keycloak_server" {
         name  = "KC_HOSTNAME_STRICT"
         value = "false"
       }
+      env {
+        name  = "KC_HOSTNAME_STRICT_HTTPS"
+        value = "false"
+      }
+      env {
+        name  = "KC_HEALTH_ENABLED"
+        value = "true"
+      }
+      env {
+        name  = "KC_METRICS_ENABLED"
+        value = "true"
+      }
 
       liveness_probe {
-        path                    = "/health/live"
+        path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 30
+        initial_delay           = 90
         interval_seconds        = 30
-        timeout                 = 10
+        timeout                 = 20
         failure_count_threshold = 5
+      }
+
+      readiness_probe {
+        path                    = "/health/ready"
+        port                    = 8080
+        transport               = "HTTP"
+        initial_delay           = 60
+        interval_seconds        = 15
+        timeout                 = 10
+        failure_count_threshold = 3
+        success_count_threshold = 1
       }
     }
   }
@@ -280,10 +314,21 @@ resource "azurerm_container_app" "frontend" {
         path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 30
+        initial_delay           = 45
         interval_seconds        = 30
         timeout                 = 10
         failure_count_threshold = 3
+      }
+
+      readiness_probe {
+        path                    = "/health"
+        port                    = 8080
+        transport               = "HTTP"
+        initial_delay           = 20
+        interval_seconds        = 15
+        timeout                 = 5
+        failure_count_threshold = 3
+        success_count_threshold = 1
       }
     }
   }
