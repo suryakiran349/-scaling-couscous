@@ -5,7 +5,7 @@ resource "azurerm_container_app_environment" "container_env" {
   resource_group_name            = var.resource_group_name
   log_analytics_workspace_id     = var.log_analytics_workspace_id
   infrastructure_subnet_id       = var.subnet_id
-  internal_load_balancer_enabled = true
+  internal_load_balancer_enabled = false  # ✅ FIXED: Allow external access via Application Gateway
 
   workload_profile {
     name                  = "Consumption"
@@ -70,7 +70,7 @@ resource "azurerm_container_app" "api_server" {
       }
       env {
         name  = "IdentityConfig__RequireHttpsMetadata"
-        value = "true"
+        value = "false"  # ✅ FIXED: Allow HTTP for Keycloak in development
       }
       env {
         name  = "AllowedHosts"
@@ -96,7 +96,7 @@ resource "azurerm_container_app" "api_server" {
       }
 
       liveness_probe {
-        path                    = "/health"
+        path                    = "/api-health"  # ✅ FIXED: Match Application Gateway probe
         port                    = 8080
         transport               = "HTTP"
         initial_delay           = 30
@@ -108,7 +108,7 @@ resource "azurerm_container_app" "api_server" {
   }
 
   ingress {
-    external_enabled = false
+    external_enabled = true  # ✅ FIXED: Enable external access for Application Gateway
     target_port      = 8080
     transport        = "http"
 
@@ -213,7 +213,7 @@ resource "azurerm_container_app" "keycloak_server" {
       }
 
       liveness_probe {
-        path                    = "/health/live"
+        path                    = "/health/ready"
         port                    = 8080
         transport               = "HTTP"
         initial_delay           = 30
@@ -225,7 +225,7 @@ resource "azurerm_container_app" "keycloak_server" {
   }
 
   ingress {
-    external_enabled = false
+    external_enabled = true  # ✅ FIXED: Enable external access for Application Gateway  
     target_port      = 8080
     transport        = "http"
 
@@ -277,7 +277,7 @@ resource "azurerm_container_app" "frontend" {
       }
 
       liveness_probe {
-        path                    = "/health"
+        path                    = "/"  # ✅ FIXED: Use root path for frontend health check
         port                    = 8080
         transport               = "HTTP"
         initial_delay           = 30
@@ -289,7 +289,7 @@ resource "azurerm_container_app" "frontend" {
   }
 
   ingress {
-    external_enabled = false
+    external_enabled = true  # ✅ FIXED: Enable external access for Application Gateway
     target_port      = 8080
     transport        = "http"
 
