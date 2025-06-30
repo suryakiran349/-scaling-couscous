@@ -169,14 +169,6 @@ resource "azurerm_container_app" "keycloak_server" {
         value = var.keycloak_db_url
       }
       env {
-        name        = "KC_DB_USERNAME"
-        secret_name = "keycloak-db-username"
-      }
-      env {
-        name        = "KC_DB_PASSWORD"
-        secret_name = "keycloak-db-password"
-      }
-      env {
         name  = "KC_FEATURES"
         value = var.keycloak_features
       }
