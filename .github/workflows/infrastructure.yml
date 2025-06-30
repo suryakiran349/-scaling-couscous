@@ -160,7 +160,7 @@ jobs:
             echo "State lock detected. Attempting to resolve..."
             
             # Extract lock ID from the output
-            LOCK_ID=$(echo "$PLAN_OUTPUT" | grep "ID:" | awk '{print $2}' | head -1)
+            LOCK_ID=$(echo "$PLAN_OUTPUT" | grep -E "^\s*ID:\s*" | awk '{print $2}' | head -1)
             if [ ! -z "$LOCK_ID" ]; then
               echo "Unlocking state with Lock ID: $LOCK_ID"
               terraform force-unlock -force "$LOCK_ID"
