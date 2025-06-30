@@ -30,6 +30,7 @@ resource "azurerm_container_app" "api_server" {
     identity = var.container_apps_identity_id
   }
 
+
   template {
     min_replicas = 1
     max_replicas = 3
@@ -56,10 +57,13 @@ resource "azurerm_container_app" "api_server" {
         name  = "ConnectionStrings__AzureBlobStorage"
         value = var.azure_blob_storage_connection_string
       }
+
       env {
         name  = "IdentityConfig__Issuer"
         value = var.keycloak_issuer_url
       }
+
+      # Keycloak authentication
       env {
         name  = "IdentityConfig__Audience"
         value = "nationoh_webapi"
@@ -89,6 +93,16 @@ resource "azurerm_container_app" "api_server" {
       env {
         name  = "Modules__3"
         value = "Schedule"
+      }
+
+      liveness_probe {
+        path                    = "/health"
+        port                    = 8080
+        transport               = "HTTP"
+        initial_delay           = 30
+        interval_seconds        = 30
+        timeout                 = 10
+        failure_count_threshold = 3
       }
     }
   }
@@ -150,7 +164,7 @@ resource "azurerm_container_app" "keycloak_server" {
       image  = "quay.io/keycloak/keycloak:${var.image_tags.keycloak}"
       cpu    = 0.5
       memory = "1Gi"
-      args   = ["start"]
+      args   = ["start", "--optimized"]
 
       env {
         name        = "KC_BOOTSTRAP_ADMIN_USERNAME"
@@ -180,6 +194,7 @@ resource "azurerm_container_app" "keycloak_server" {
         name  = "KC_FEATURES"
         value = var.keycloak_features
       }
+
       env {
         name  = "KC_HTTP_ENABLED"
         value = "true"
@@ -196,25 +211,15 @@ resource "azurerm_container_app" "keycloak_server" {
         name  = "KC_HOSTNAME_STRICT"
         value = "false"
       }
-      env {
-        name  = "KC_HOSTNAME_STRICT_HTTPS"
-        value = "false"
-      }
-      env {
-        name  = "KC_HEALTH_ENABLED"
-        value = "true"
-      }
-      env {
-        name  = "KC_METRICS_ENABLED"
-        value = "true"
-      }
-      env {
-        name  = "KC_HOSTNAME_STRICT_BACKCHANNEL"
-        value = "false"
-      }
-      env {
-        name  = "KC_LOG_LEVEL"
-        value = "INFO"
+
+      liveness_probe {
+        path                    = "/health/live"
+        port                    = 8080
+        transport               = "HTTP"
+        initial_delay           = 30
+        interval_seconds        = 30
+        timeout                 = 10
+        failure_count_threshold = 5
       }
     }
   }
@@ -269,6 +274,16 @@ resource "azurerm_container_app" "frontend" {
       env {
         name  = "KEYCLOAK_URL"
         value = var.keycloak_url
+      }
+
+      liveness_probe {
+        path                    = "/health"
+        port                    = 8080
+        transport               = "HTTP"
+        initial_delay           = 30
+        interval_seconds        = 30
+        timeout                 = 10
+        failure_count_threshold = 3
       }
     }
   }
