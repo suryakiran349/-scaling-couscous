@@ -99,9 +99,7 @@ resource "azurerm_container_app" "api_server" {
         path                    = "/api-health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 60
         interval_seconds        = 30
-        timeout                 = 15
         failure_count_threshold = 5
       }
 
@@ -109,9 +107,7 @@ resource "azurerm_container_app" "api_server" {
         path                    = "/api-health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 30
         interval_seconds        = 15
-        timeout                 = 10
         failure_count_threshold = 3
         success_count_threshold = 1
       }
@@ -239,19 +235,15 @@ resource "azurerm_container_app" "keycloak_server" {
         path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 90
         interval_seconds        = 30
-        timeout                 = 20
         failure_count_threshold = 5
       }
 
       readiness_probe {
-        path                    = "/health/ready"
+        path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 60
         interval_seconds        = 15
-        timeout                 = 10
         failure_count_threshold = 3
         success_count_threshold = 1
       }
@@ -314,9 +306,7 @@ resource "azurerm_container_app" "frontend" {
         path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 45
         interval_seconds        = 30
-        timeout                 = 10
         failure_count_threshold = 3
       }
 
@@ -324,9 +314,7 @@ resource "azurerm_container_app" "frontend" {
         path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 20
         interval_seconds        = 15
-        timeout                 = 5
         failure_count_threshold = 3
         success_count_threshold = 1
       }

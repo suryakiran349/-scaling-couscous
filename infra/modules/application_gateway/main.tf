@@ -165,7 +165,7 @@ resource "azurerm_application_gateway" "app_gateway" {
   probe {
     name                                      = "api-health-probe"
     protocol                                  = "Http"
-    path                                      = "/health/live"
+    path                                      = "/api-health"
     interval                                  = 30
     timeout                                   = 30
     unhealthy_threshold                       = 5
@@ -178,7 +178,7 @@ resource "azurerm_application_gateway" "app_gateway" {
     path                                      = "/health"
     interval                                  = 30
     timeout                                   = 30
-    unhealthy_threshold                       = 5
+    unhealthy_threshold                       = 3
     pick_host_name_from_backend_http_settings = true
   }
 
