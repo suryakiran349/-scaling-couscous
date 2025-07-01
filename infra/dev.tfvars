@@ -13,9 +13,8 @@ container_memory       = "1Gi"
 aspnetcore_environment = "Development"
 
 # Container Images (applying commit 244a9e0 changes - using actual images instead of nginx)
-server_image   = "nohdevjun2025a2b7cregistry.azurecr.io/app.server:dev-latest"
-frontend_image = "nohdevjun2025a2b7cregistry.azurecr.io/app.client:dev-latest"
-
+server_image   = "nohdevoct2025registry.azurecr.io/app.server:latest"
+frontend_image = "nohdevoct2025registry.azurecr.io/app.client:latest"
 # Allowed Hosts
 allowed_hosts = "*"
 
