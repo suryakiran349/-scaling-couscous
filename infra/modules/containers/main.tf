@@ -108,10 +108,9 @@ resource "azurerm_container_app" "api_server" {
   }
 
   ingress {
-    external_enabled = true  # Changed to true to ensure the Application Gateway can reach it
+    external_enabled = false
     target_port      = 8080
     transport        = "http"
-    allow_insecure_connections = true  # Allow App Gateway to connect via HTTP
 
     traffic_weight {
       percentage      = 100
@@ -226,10 +225,9 @@ resource "azurerm_container_app" "keycloak_server" {
   }
 
   ingress {
-    external_enabled = true  # Changed to true to ensure the Application Gateway can reach it
+    external_enabled = false
     target_port      = 8080
     transport        = "http"
-    allow_insecure_connections = true  # Allow App Gateway to connect via HTTP
 
     traffic_weight {
       percentage      = 100
@@ -291,10 +289,9 @@ resource "azurerm_container_app" "frontend" {
   }
 
   ingress {
-    external_enabled = true  # Changed to true to ensure the Application Gateway can reach it
+    external_enabled = false
     target_port      = 8080
     transport        = "http"
-    allow_insecure_connections = true  # Allow App Gateway to connect via HTTP
 
     traffic_weight {
       percentage      = 100

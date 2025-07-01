@@ -120,6 +120,7 @@ resource "azurerm_private_endpoint" "storage" {
     name                 = "storage-dns-zone-group"
     private_dns_zone_ids = [azurerm_private_dns_zone.blob.id]
   }
+  depends_on = [ azurerm_storage_container.app_data, azurerm_storage_container.backups, azurerm_storage_container.media ]
 }
 
 # Private DNS Zone for Blob Storage

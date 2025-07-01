@@ -61,10 +61,6 @@ resource "azurerm_application_gateway" "app_gateway" {
     tier     = var.app_gateway_sku_tier
     capacity = 2
   }
-  
-  # Enable detailed debugging to troubleshoot connectivity issues
-  enable_http2                 = true
-  force_firewall_policy_association = true
 
   gateway_ip_configuration {
     name      = "gateway-ip-config"
@@ -127,9 +123,10 @@ resource "azurerm_application_gateway" "app_gateway" {
     cookie_based_affinity               = "Disabled"
     port                                = 8080
     protocol                            = "Http"
-    request_timeout                     = 120  # Increased timeout
+    request_timeout                     = 60
     probe_name                          = "frontend-health-probe"
-    pick_host_name_from_backend_address = true  # Use backend FQDN
+    pick_host_name_from_backend_address = false
+    # host_name                           = var.frontend_fqdn
   }
 
   backend_http_settings {
@@ -137,9 +134,10 @@ resource "azurerm_application_gateway" "app_gateway" {
     cookie_based_affinity               = "Disabled"
     port                                = 8080
     protocol                            = "Http"
-    request_timeout                     = 120  # Increased timeout
+    request_timeout                     = 60
     probe_name                          = "api-health-probe"
-    pick_host_name_from_backend_address = true  # Use backend FQDN
+    pick_host_name_from_backend_address = false
+    # host_name                           = var.api_fqdn
   }
 
   backend_http_settings {
@@ -147,52 +145,41 @@ resource "azurerm_application_gateway" "app_gateway" {
     cookie_based_affinity               = "Enabled"
     port                                = 8080
     protocol                            = "Http"
-    request_timeout                     = 120  # Increased timeout
+    request_timeout                     = 60
     probe_name                          = "auth-health-probe"
-    pick_host_name_from_backend_address = true  # Use backend FQDN
+    pick_host_name_from_backend_address = false
+    # host_name                           = var.auth_fqdn
   }
 
   # Health probes
   probe {
-    name                = "frontend-health-probe"
-    protocol            = "Http"
-    path                = "/health"  # Use the health endpoint defined in nginx.conf
-    interval            = 30         # Longer interval for more stability
-    timeout             = 20         # Increased timeout for slow responses
-    unhealthy_threshold = 3          # Standard threshold 
-    host                = var.frontend_fqdn
-    match {
-      status_code = ["200-499"]  # Accept any non-server error response
-      body        = "*"          # Match any response body
-    }
+    name                                      = "frontend-health-probe"
+    protocol                                  = "Http"
+    path                                      = "/"
+    interval                                  = 30
+    timeout                                   = 30
+    unhealthy_threshold                       = 3
+    pick_host_name_from_backend_http_settings = true
   }
 
   probe {
-    name                = "api-health-probe"
-    protocol            = "Http"
-    path                = "/health"  # Match the new health endpoint in Program.cs
-    interval            = 30         # Longer interval for more stability
-    timeout             = 20         # Increased timeout for slow responses
-    unhealthy_threshold = 3          # Standard threshold
-    host                = var.api_fqdn
-    match {
-      status_code = ["200-499"]  # Accept any non-server error response
-      body        = "*"          # Match any response body
-    }
+    name                                      = "api-health-probe"
+    protocol                                  = "Http"
+    path                                      = "/health"
+    interval                                  = 30
+    timeout                                   = 30
+    unhealthy_threshold                       = 3
+    pick_host_name_from_backend_http_settings = true
   }
 
   probe {
-    name                = "auth-health-probe"
-    protocol            = "Http"
-    path                = "/health/live"  # Standard Keycloak health endpoint
-    interval            = 30              # Longer interval for more stability
-    timeout             = 20              # Increased timeout for slow responses
-    unhealthy_threshold = 3               # Standard threshold
-    host                = var.auth_fqdn
-    match {
-      status_code = ["200-499"]  # Accept any non-server error response
-      body        = "*"          # Match any response body
-    }
+    name                                      = "auth-health-probe"
+    protocol                                  = "Http"
+    path                                      = "/health/live"
+    interval                                  = 30
+    timeout                                   = 30
+    unhealthy_threshold                       = 3
+    pick_host_name_from_backend_http_settings = true
   }
 
   #   HTTP listener

@@ -51,6 +51,7 @@ resource "azurerm_postgresql_flexible_server_database" "app_db" {
   # }
 }
 
+
 # Keycloak Database
 resource "azurerm_postgresql_flexible_server_database" "keycloak_db" {
   name      = var.keycloak_db_name
@@ -72,4 +73,5 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "container_apps" {
   start_ip_address = var.container_subnet_cidr_start
   end_ip_address   = var.container_subnet_cidr_end
 }
+
     
