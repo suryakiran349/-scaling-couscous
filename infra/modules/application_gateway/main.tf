@@ -125,7 +125,7 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "frontend-health-probe"
-    pick_host_name_from_backend_address = false
+    pick_host_name_from_backend_address = true
     # host_name                           = var.frontend_fqdn
   }
 
@@ -136,7 +136,7 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "api-health-probe"
-    pick_host_name_from_backend_address = false
+    pick_host_name_from_backend_address = true
     # host_name                           = var.api_fqdn
   }
 
@@ -147,7 +147,7 @@ resource "azurerm_application_gateway" "app_gateway" {
     protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "auth-health-probe"
-    pick_host_name_from_backend_address = false
+    pick_host_name_from_backend_address = true
     # host_name                           = var.auth_fqdn
   }
 
