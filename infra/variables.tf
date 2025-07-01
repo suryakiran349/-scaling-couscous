@@ -10,6 +10,8 @@ variable "resource_group_name" {
   default     = "nationohrg"
 }
 
+
+
 variable "github_actions_service_principal_object_id" {
   description = "Object ID of the GitHub Actions service principal for Key Vault access"
   type        = string
@@ -44,7 +46,7 @@ variable "aspnetcore_environment" {
 variable "keycloak_issuer_url" {
   description = "Keycloak issuer URL"
   type        = string
-  default     = "https://auth.nohdevjun2025.uksouth.cloudapp.azure.com/realms/NationOH"
+  default     = ""
 }
 
 variable "keycloak_features" {
@@ -115,10 +117,5 @@ variable "app_gateway_sku_tier" {
   description = "SKU tier for the Application Gateway"
   type        = string
   default     = "Standard_v2"
-}
-
-variable "subscription_id" {
-  description = "Azure Subscription ID"
-  type        = string
 }
 

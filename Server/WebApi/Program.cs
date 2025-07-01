@@ -17,6 +17,8 @@ builder.Services.RegisterServices(builder.Configuration, ref moduleTypes, out va
 var app = builder.Build();
 
 app.ConfigureServicesAndMapEndpoints(builder.Environment.IsDevelopment(), ref moduleTypes, registeredModules);
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
+	.AllowAnonymous();
 app.MapGet("/api-health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
 	.AllowAnonymous();
 app.Run();

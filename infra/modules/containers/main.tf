@@ -5,7 +5,7 @@ resource "azurerm_container_app_environment" "container_env" {
   resource_group_name            = var.resource_group_name
   log_analytics_workspace_id     = var.log_analytics_workspace_id
   infrastructure_subnet_id       = var.subnet_id
-  internal_load_balancer_enabled = true  # ✅ FIXED: Use internal LB to avoid public IP limit
+  internal_load_balancer_enabled = true
 
   workload_profile {
     name                  = "Consumption"
@@ -70,7 +70,7 @@ resource "azurerm_container_app" "api_server" {
       }
       env {
         name  = "IdentityConfig__RequireHttpsMetadata"
-        value = "false"  # ✅ FIXED: Allow HTTP for Keycloak in development
+        value = "false"
       }
       env {
         name  = "AllowedHosts"
@@ -96,19 +96,28 @@ resource "azurerm_container_app" "api_server" {
       }
 
       liveness_probe {
-        path                    = "/api-health"  # ✅ FIXED: Match Application Gateway probe
+        path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 30
         interval_seconds        = 30
         timeout                 = 10
+        failure_count_threshold = 3
+      }
+
+      readiness_probe {
+        path                    = "/health"
+        port                    = 8080
+        transport               = "HTTP"
+        interval_seconds        = 10
+        timeout                 = 5
         failure_count_threshold = 3
       }
     }
   }
 
+
   ingress {
-    external_enabled = true  # ✅ FIXED: Enable external access for Application Gateway
+    external_enabled = false
     target_port      = 8080
     transport        = "http"
 
@@ -164,7 +173,7 @@ resource "azurerm_container_app" "keycloak_server" {
       image  = "quay.io/keycloak/keycloak:${var.image_tags.keycloak}"
       cpu    = 0.5
       memory = "1Gi"
-      args   = ["start", "--optimized"]
+      args   = ["start-dev"]
 
       env {
         name        = "KC_BOOTSTRAP_ADMIN_USERNAME"
@@ -211,21 +220,45 @@ resource "azurerm_container_app" "keycloak_server" {
         name  = "KC_HOSTNAME_STRICT"
         value = "false"
       }
+      env {
+        name  = "KC_PROXY_ADDRESS_FORWARDING"
+        value = "true"
+      }
+      env {
+        name  = "KC_HOSTNAME_STRICT_HTTPS"
+        value = "false"
+      }
+      env {
+        name  = "KC_HEALTH_ENABLED"
+        value = "true"
+      }
+      env {
+        name  = "KC_METRICS_ENABLED"
+        value = "true"
+      }
 
       liveness_probe {
-        path                    = "/health/ready"
+        path                    = "/health/live"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 30
         interval_seconds        = 30
         timeout                 = 10
         failure_count_threshold = 5
+      }
+
+      startup_probe {
+        path                    = "/health/ready"
+        port                    = 8080
+        transport               = "HTTP"
+        interval_seconds        = 10
+        timeout                 = 5
+        failure_count_threshold = 30
       }
     }
   }
 
   ingress {
-    external_enabled = true  # ✅ FIXED: Enable external access for Application Gateway  
+    external_enabled = false
     target_port      = 8080
     transport        = "http"
 
@@ -277,19 +310,27 @@ resource "azurerm_container_app" "frontend" {
       }
 
       liveness_probe {
-        path                    = "/"  # ✅ FIXED: Use root path for frontend health check
+        path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
-        initial_delay           = 30
         interval_seconds        = 30
         timeout                 = 10
+        failure_count_threshold = 3
+      }
+
+      readiness_probe {
+        path                    = "/health"
+        port                    = 8080
+        transport               = "HTTP"
+        interval_seconds        = 10
+        timeout                 = 5
         failure_count_threshold = 3
       }
     }
   }
 
   ingress {
-    external_enabled = true  # ✅ FIXED: Enable external access for Application Gateway
+    external_enabled = false
     target_port      = 8080
     transport        = "http"
 

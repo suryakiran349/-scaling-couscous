@@ -95,7 +95,7 @@ resource "azurerm_key_vault" "kv" {
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     # Will need to change this to the actual object id of the github actions service principal
-    object_id = "4e4da53e-e85a-430f-9bcf-168ca0d53bc6"
+    object_id = "019d3538-07e6-4a12-8c97-5102eaa66c6b"
 
     secret_permissions = [
       "Get",

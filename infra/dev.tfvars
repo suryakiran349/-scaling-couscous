@@ -1,13 +1,12 @@
 # Development Environment Variables - Consolidated Infrastructure
 
 # Basic Configuration
-resource_group_name = "nohdevjun2025a2b7c"
+resource_group_name = "nohdevoct2025"
 location            = "uksouth"
 environment         = "dev"
 
 # GitHub Actions Service Principal Object ID for Key Vault access
-github_actions_service_principal_object_id = "4e4da53e-e85a-430f-9bcf-168ca0d53bc6"
-
+github_actions_service_principal_object_id = "019d3538-07e6-4a12-8c97-5102eaa66c6b"
 # Container Configuration
 container_cpu          = 0.5
 container_memory       = "1Gi"

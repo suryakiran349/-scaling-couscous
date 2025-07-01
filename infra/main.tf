@@ -15,7 +15,7 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
-  subscription_id = var.subscription_id
+  subscription_id = ""
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -78,7 +78,7 @@ module "storage" {
   source               = "./modules/storage"
   location             = var.location
   resource_group_name  = azurerm_resource_group.rg.name
-  storage_account_name = "vsuryastg"
+  storage_account_name = "${var.resource_group_name}storage"
   vnet_id              = module.networking.vnet_id
   subnet_ids           = module.networking.subnets_ids
   key_vault_id         = module.secrets.key_vault_id
@@ -137,7 +137,7 @@ module "containers" {
   server_container_app_name = "${var.resource_group_name}server"
 
   # Server environment variables
-  keycloak_issuer_url                  = var.keycloak_issuer_url
+  keycloak_issuer_url                  = "https://${var.resource_group_name}-gateway.${var.location}.cloudapp.azure.com/auth/realms/NationOH"
   allowed_hosts                        = var.allowed_hosts
   app_database_connection_string       = "Host=${module.database.postgresql_server_fqdn};Port=5432;Database=${module.database.app_database_name};Username=${module.secrets.postgresql_admin_username};Password=${module.secrets.postgresql_admin_password};SSL Mode=Require;Trust Server Certificate=true"
   azure_blob_storage_connection_string = "DefaultEndpointsProtocol=https;AccountName=${module.storage.storage_account_name};AccountKey=${module.storage.primary_access_key};EndpointSuffix=core.windows.net"
@@ -168,7 +168,8 @@ module "containers" {
     module.database,
     module.secrets,
     module.registry,
-    azurerm_role_assignment.acr_pull_role
+    azurerm_role_assignment.acr_pull_role,
+    azurerm_private_dns_zone.container_apps
   ]
 }
 
@@ -191,10 +192,8 @@ module "application_gateway" {
 
 # Private DNS Zone for Container Apps (created after containers are deployed)
 resource "azurerm_private_dns_zone" "container_apps" {
-  name                = module.containers.container_env_default_domain
+  name                = "${var.resource_group_name}.${var.location}.azurecontainerapps.io"
   resource_group_name = azurerm_resource_group.rg.name
-
-  depends_on = [module.containers]
 }
 
 # Link the Container Apps DNS Zone to the VNet
@@ -203,8 +202,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "container_apps" {
   resource_group_name   = azurerm_resource_group.rg.name
   private_dns_zone_name = azurerm_private_dns_zone.container_apps.name
   virtual_network_id    = module.networking.vnet_id
-
-  depends_on = [module.containers, module.networking]
 }
 
 # Wildcard A-record for Container Apps
@@ -215,7 +212,7 @@ resource "azurerm_private_dns_a_record" "container_apps_wildcard" {
   ttl                 = 300
   records             = [module.containers.container_env_static_ip]
 
-  depends_on = [azurerm_private_dns_zone.container_apps]
+  depends_on = [module.containers]
 }
 
 # Root A-record for Container Apps
@@ -226,7 +223,7 @@ resource "azurerm_private_dns_a_record" "container_apps_root" {
   ttl                 = 300
   records             = [module.containers.container_env_static_ip]
 
-  depends_on = [azurerm_private_dns_zone.container_apps]
+  depends_on = [module.containers]
 }
 
 # Test VM for connectivity testing (dev only)

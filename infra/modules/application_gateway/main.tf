@@ -151,7 +151,7 @@ resource "azurerm_application_gateway" "app_gateway" {
     host_name                           = var.auth_fqdn
   }
 
-  # Health probes - FIXED for 502 errors
+  # Health probes
   probe {
     name                                      = "frontend-health-probe"
     protocol                                  = "Http"
@@ -165,7 +165,7 @@ resource "azurerm_application_gateway" "app_gateway" {
   probe {
     name                                      = "api-health-probe"
     protocol                                  = "Http"
-    path                                      = "/api-health"  # ✅ FIXED: Correct API health endpoint
+    path                                      = "/health"
     interval                                  = 30
     timeout                                   = 30
     unhealthy_threshold                       = 3
@@ -175,7 +175,7 @@ resource "azurerm_application_gateway" "app_gateway" {
   probe {
     name                                      = "auth-health-probe"
     protocol                                  = "Http"
-    path                                      = "/health/ready"  # ✅ FIXED: Correct Keycloak health endpoint
+    path                                      = "/health/ready"
     interval                                  = 30
     timeout                                   = 30
     unhealthy_threshold                       = 3
