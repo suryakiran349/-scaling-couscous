@@ -70,7 +70,7 @@ resource "azurerm_container_app" "api_server" {
       }
       env {
         name  = "IdentityConfig__RequireHttpsMetadata"
-        value = "false"
+        value = "true"
       }
       env {
         name  = "AllowedHosts"
@@ -99,27 +99,19 @@ resource "azurerm_container_app" "api_server" {
         path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
+        initial_delay           = 30
         interval_seconds        = 30
         timeout                 = 10
-        failure_count_threshold = 3
-      }
-
-      readiness_probe {
-        path                    = "/health"
-        port                    = 8080
-        transport               = "HTTP"
-        interval_seconds        = 10
-        timeout                 = 5
         failure_count_threshold = 3
       }
     }
   }
 
-
   ingress {
-    external_enabled = false
+    external_enabled = true  # Changed to true to ensure the Application Gateway can reach it
     target_port      = 8080
     transport        = "http"
+    allow_insecure_connections = true  # Allow App Gateway to connect via HTTP
 
     traffic_weight {
       percentage      = 100
@@ -173,7 +165,7 @@ resource "azurerm_container_app" "keycloak_server" {
       image  = "quay.io/keycloak/keycloak:${var.image_tags.keycloak}"
       cpu    = 0.5
       memory = "1Gi"
-      args   = ["start-dev"]
+      args   = ["start", "--optimized"]
 
       env {
         name        = "KC_BOOTSTRAP_ADMIN_USERNAME"
@@ -220,47 +212,24 @@ resource "azurerm_container_app" "keycloak_server" {
         name  = "KC_HOSTNAME_STRICT"
         value = "false"
       }
-      env {
-        name  = "KC_PROXY_ADDRESS_FORWARDING"
-        value = "true"
-      }
-      env {
-        name  = "KC_HOSTNAME_STRICT_HTTPS"
-        value = "false"
-      }
-      env {
-        name  = "KC_HEALTH_ENABLED"
-        value = "true"
-      }
-      env {
-        name  = "KC_METRICS_ENABLED"
-        value = "true"
-      }
 
       liveness_probe {
         path                    = "/health/live"
         port                    = 8080
         transport               = "HTTP"
+        initial_delay           = 30
         interval_seconds        = 30
         timeout                 = 10
         failure_count_threshold = 5
-      }
-
-      startup_probe {
-        path                    = "/health/ready"
-        port                    = 8080
-        transport               = "HTTP"
-        interval_seconds        = 10
-        timeout                 = 5
-        failure_count_threshold = 30
       }
     }
   }
 
   ingress {
-    external_enabled = false
+    external_enabled = true  # Changed to true to ensure the Application Gateway can reach it
     target_port      = 8080
     transport        = "http"
+    allow_insecure_connections = true  # Allow App Gateway to connect via HTTP
 
     traffic_weight {
       percentage      = 100
@@ -313,26 +282,19 @@ resource "azurerm_container_app" "frontend" {
         path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
+        initial_delay           = 30
         interval_seconds        = 30
         timeout                 = 10
-        failure_count_threshold = 3
-      }
-
-      readiness_probe {
-        path                    = "/health"
-        port                    = 8080
-        transport               = "HTTP"
-        interval_seconds        = 10
-        timeout                 = 5
         failure_count_threshold = 3
       }
     }
   }
 
   ingress {
-    external_enabled = false
+    external_enabled = true  # Changed to true to ensure the Application Gateway can reach it
     target_port      = 8080
     transport        = "http"
+    allow_insecure_connections = true  # Allow App Gateway to connect via HTTP
 
     traffic_weight {
       percentage      = 100

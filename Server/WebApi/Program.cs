@@ -17,8 +17,13 @@ builder.Services.RegisterServices(builder.Configuration, ref moduleTypes, out va
 var app = builder.Build();
 
 app.ConfigureServicesAndMapEndpoints(builder.Environment.IsDevelopment(), ref moduleTypes, registeredModules);
+
+// Standard health endpoint for Application Gateway health probe
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
 	.AllowAnonymous();
+
+// Keep original endpoint for backward compatibility
 app.MapGet("/api-health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
 	.AllowAnonymous();
+
 app.Run();

@@ -9,10 +9,7 @@ variable "resource_group_name" {
   type        = string
   default     = "nationohrg"
 }
-variable "subscription_id" {
-  description = "Azure Subscription ID"
-  type        = string
-}
+
 
 
 variable "github_actions_service_principal_object_id" {
@@ -49,7 +46,7 @@ variable "aspnetcore_environment" {
 variable "keycloak_issuer_url" {
   description = "Keycloak issuer URL"
   type        = string
-  default     = ""
+  default     = "https://auth.nohdevjun2025.uksouth.cloudapp.azure.com/realms/NationOH"
 }
 
 variable "keycloak_features" {
