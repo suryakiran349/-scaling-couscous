@@ -6,7 +6,7 @@ location            = "uksouth"
 environment         = "dev"
 
 # GitHub Actions Service Principal Object ID for Key Vault access
-github_actions_service_principal_object_id = "4e4da53e-e85a-430f-9bcf-168ca0d53bc6"
+github_actions_service_principal_object_id = "d5b35fe0-23a4-4fc7-a0ae-8662977f400a"
 
 # Container Configuration
 container_cpu          = 0.5
