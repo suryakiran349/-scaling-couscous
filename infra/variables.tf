@@ -9,7 +9,10 @@ variable "resource_group_name" {
   type        = string
   default     = "nationohrg"
 }
-
+variable "subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
+}
 
 
 variable "github_actions_service_principal_object_id" {
