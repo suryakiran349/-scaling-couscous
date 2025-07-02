@@ -1,7 +1,7 @@
 # Development Environment Variables - Consolidated Infrastructure
 
 # Basic Configuration
-resource_group_name = "nohdevdec2026"
+resource_group_name = "nohdevdec2027"
 location            = "uksouth"
 environment         = "dev"
 
@@ -14,8 +14,8 @@ container_memory       = "1Gi"
 aspnetcore_environment = "Development"
 
 # Container Images (applying commit 244a9e0 changes - using actual images instead of nginx)
-server_image   = "nohdevdec2026registry.azurecr.io/app.server:dev-latest"
-frontend_image = "nohdevdec2026registry.azurecr.io/app.client:dev-latest"
+server_image   = "nohdevdec2027registry.azurecr.io/app.server:dev-latest"
+frontend_image = "nohdevdec2027registry.azurecr.io/app.client:dev-latest"
 
 # Allowed Hosts
 allowed_hosts = "*"

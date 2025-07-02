@@ -96,7 +96,7 @@ resource "azurerm_container_app" "api_server" {
       }
 
       liveness_probe {
-        path                    = "/health"
+        path                    = "/health/api"
         port                    = 8080
         transport               = "HTTP"
         initial_delay           = 30
@@ -164,7 +164,7 @@ resource "azurerm_container_app" "keycloak_server" {
       image  = "quay.io/keycloak/keycloak:${var.image_tags.keycloak}"
       cpu    = 0.5
       memory = "1Gi"
-      args = ["start-dev"]
+      args   = ["start", "--optimized"]
 
       env {
         name        = "KC_BOOTSTRAP_ADMIN_USERNAME"
@@ -227,7 +227,7 @@ resource "azurerm_container_app" "keycloak_server" {
   ingress {
     external_enabled = false
     target_port      = 8080
-    transport        = "auto"
+    transport        = "http"
 
     traffic_weight {
       percentage      = 100

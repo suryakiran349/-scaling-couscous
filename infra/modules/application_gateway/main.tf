@@ -119,70 +119,67 @@ resource "azurerm_application_gateway" "app_gateway" {
   }
 
   backend_http_settings {
-    name                                = "frontend-https-settings"
+    name                                = "frontend-http-settings"
     cookie_based_affinity               = "Disabled"
-    port                                = 443
-    protocol                            = "Https"
+    port                                = 8080
+    protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "frontend-health-probe"
-    pick_host_name_from_backend_address = true
-    # host_name                           = var.frontend_fqdn
+    pick_host_name_from_backend_address = false
+    host_name                           = var.frontend_fqdn
   }
 
   backend_http_settings {
-    name                                = "api-https-settings"
+    name                                = "api-http-settings"
     cookie_based_affinity               = "Disabled"
-    port                                = 443
-    protocol                            = "Https"
+    port                                = 8080
+    protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "api-health-probe"
-    pick_host_name_from_backend_address = true
-    # host_name                           = var.api_fqdn
+    pick_host_name_from_backend_address = false
+    host_name                           = var.api_fqdn
   }
 
   backend_http_settings {
-    name                                = "auth-https-settings"
+    name                                = "auth-http-settings"
     cookie_based_affinity               = "Enabled"
-    port                                = 443
-    protocol                            = "Https"
+    port                                = 8080
+    protocol                            = "Http"
     request_timeout                     = 60
     probe_name                          = "auth-health-probe"
-    pick_host_name_from_backend_address = true
-    # host_name                           = var.auth_fqdn
+    pick_host_name_from_backend_address = false
+    host_name                           = var.auth_fqdn
   }
 
   # Health probes
   probe {
     name                                      = "frontend-health-probe"
-    protocol                                  = "Https"
-    path                                      = "/"
-    interval                                  = 30
-    timeout                                   = 30
-    unhealthy_threshold                       = 3
-    host                                      = var.frontend_fqdn
-    pick_host_name_from_backend_http_settings = false
-  }
-
-  probe {
-    name                                      = "api-health-probe"
-    protocol                                  = "Https"
+    protocol                                  = "Http"
     path                                      = "/health"
     interval                                  = 30
     timeout                                   = 30
     unhealthy_threshold                       = 3
-    pick_host_name_from_backend_http_settings = false
-    host                                      = var.api_fqdn
+    pick_host_name_from_backend_http_settings = true
+  }
+
+  probe {
+    name                                      = "api-health-probe"
+    protocol                                  = "Http"
+    path                                      = "/health/api"
+    interval                                  = 30
+    timeout                                   = 30
+    unhealthy_threshold                       = 3
+    pick_host_name_from_backend_http_settings = true
   }
 
   probe {
     name                                      = "auth-health-probe"
-    protocol                                  = "Https"
+    protocol                                  = "Http"
     path                                      = "/health/live"
     interval                                  = 30
     timeout                                   = 30
     unhealthy_threshold                       = 3
-    pick_host_name_from_backend_http_settings = false
-    host                                      = var.auth_fqdn
+    pick_host_name_from_backend_http_settings = true
   }
 
   #   HTTP listener
@@ -211,13 +208,13 @@ resource "azurerm_application_gateway" "app_gateway" {
   url_path_map {
     name                               = "path-based-routing"
     default_backend_address_pool_name  = "frontend-backend-pool"
-    default_backend_http_settings_name = "frontend-https-settings"
+    default_backend_http_settings_name = "frontend-http-settings"
 
     path_rule {
       name                       = "api-rule"
       paths                      = ["/api/*"]
       backend_address_pool_name  = "api-backend-pool"
-      backend_http_settings_name = "api-https-settings"
+      backend_http_settings_name = "api-http-settings"
 
     }
 
@@ -225,7 +222,7 @@ resource "azurerm_application_gateway" "app_gateway" {
       name                       = "auth-rule"
       paths                      = ["/auth/*"]
       backend_address_pool_name  = "auth-backend-pool"
-      backend_http_settings_name = "auth-https-settings"
+      backend_http_settings_name = "auth-http-settings"
     }
   }
 
