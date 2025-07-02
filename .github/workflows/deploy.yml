@@ -77,7 +77,7 @@ jobs:
           if [[ "${{ steps.env.outputs.ENV }}" == "prod" ]]; then
             RESOURCE_GROUP="nationohprod"
           else
-            RESOURCE_GROUP="nohdevdec2025"
+            RESOURCE_GROUP="nohdevdec2026"
           fi
           echo "RESOURCE_GROUP=$RESOURCE_GROUP" >> $GITHUB_OUTPUT
           
