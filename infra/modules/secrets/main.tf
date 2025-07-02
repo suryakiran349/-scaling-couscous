@@ -217,6 +217,9 @@ resource "azurerm_key_vault_secret" "postgresql_admin_username" {
   name         = "postgresql-admin-username"
   value        = "${random_string.postgresql_admin_username_prefix.result}${random_string.postgresql_admin_username_suffix.result}"
   key_vault_id = azurerm_key_vault.kv.id
+  lifecycle {
+    create_before_destroy = true
+    }
 }
 
 resource "random_password" "postgresql_admin_password" {
@@ -228,6 +231,9 @@ resource "azurerm_key_vault_secret" "postgresql_admin_password" {
   name         = "postgresql-admin-password"
   value        = random_password.postgresql_admin_password.result
   key_vault_id = azurerm_key_vault.kv.id
+  lifecycle {
+    create_before_destroy = true
+    }
 }
 
 # Keycloak admin credentials
@@ -249,6 +255,9 @@ resource "azurerm_key_vault_secret" "keycloak_admin_username" {
   name         = "keycloak-admin-username"
   value        = "${random_string.keycloak_admin_username_prefix.result}${random_string.keycloak_admin_username_suffix.result}"
   key_vault_id = azurerm_key_vault.kv.id
+  lifecycle {
+    create_before_destroy = true
+    }
 }
 
 resource "random_password" "keycloak_admin_password" {
@@ -260,6 +269,9 @@ resource "azurerm_key_vault_secret" "keycloak_admin_password" {
   name         = "keycloak-admin-password"
   value        = random_password.keycloak_admin_password.result
   key_vault_id = azurerm_key_vault.kv.id
+  lifecycle {
+    create_before_destroy = true
+    }
 }
 
 resource "random_password" "keycloak_db_username" {
@@ -271,6 +283,9 @@ resource "azurerm_key_vault_secret" "keycloak_db_username" {
   name         = "keycloak-db-username"
   value        = random_password.keycloak_db_username.result
   key_vault_id = azurerm_key_vault.kv.id
+    lifecycle {
+    create_before_destroy = true
+}
 }
 
 resource "random_password" "keycloak_db_password" {
@@ -282,7 +297,11 @@ resource "azurerm_key_vault_secret" "keycloak_db_password" {
   name         = "keycloak-db-password"
   value        = random_password.keycloak_db_password.result
   key_vault_id = azurerm_key_vault.kv.id
+    lifecycle {
+    create_before_destroy = true
+    }
 }
+
 
 # # SSL certificate password
 # resource "azurerm_key_vault_secret" "ssl_certificate_password" {

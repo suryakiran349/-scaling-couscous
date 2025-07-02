@@ -123,4 +123,9 @@ variable "app_gateway_sku_tier" {
   type        = string
   default     = "Standard_v2"
 }
+variable "keycloak_managed_identity_object_id" {
+  description = "Object ID of the Keycloak managed identity"
+  type        = string
+  default     = ""
+}
 

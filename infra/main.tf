@@ -64,6 +64,11 @@ module "secrets" {
   vnet_id                                    = module.networking.vnet_id
   keycloak_managed_identity_object_id        = azurerm_user_assigned_identity.uai_keycloak.principal_id
   github_actions_service_principal_object_id = var.github_actions_service_principal_object_id
+
+  depends_on = [
+    azurerm_user_assigned_identity.uai_keycloak,
+    module.networking
+  ]
 }
 
 module "monitoring" {
