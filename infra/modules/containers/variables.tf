@@ -152,3 +152,9 @@ variable "frontend_image" {
   type        = string
   default     = "nginx:alpine"
 }
+
+variable "cors_allowed_origins" {
+  description = "CORS allowed origins for the API server"
+  type        = string
+  default     = "*"
+}

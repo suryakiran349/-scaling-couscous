@@ -70,7 +70,7 @@ resource "azurerm_container_app" "api_server" {
       }
       env {
         name  = "IdentityConfig__RequireHttpsMetadata"
-        value = "true"
+        value = "false"
       }
       env {
         name  = "AllowedHosts"
@@ -95,8 +95,26 @@ resource "azurerm_container_app" "api_server" {
         value = "Schedule"
       }
 
+      env {
+        name  = "Cors__AllowedOrigins"
+        value = var.keycloak_url
+      }
+      env {
+        name  = "Cors__AllowCredentials"
+        value = "true"
+      }
+
+      env {
+        name  = "Logging__LogLevel__Microsoft.AspNetCore.Authentication"
+        value = "Debug"
+      }
+      env {
+        name  = "Logging__LogLevel__Microsoft.AspNetCore.Authorization"
+        value = "Debug"
+      }
+
       liveness_probe {
-        path                    = "/health/api"
+        path                    = "/health"
         port                    = 8080
         transport               = "HTTP"
         initial_delay           = 30
@@ -211,6 +229,14 @@ resource "azurerm_container_app" "keycloak_server" {
         name  = "KC_HOSTNAME_STRICT"
         value = "false"
       }
+      env {
+        name  = "KC_HOSTNAME"
+        value = "${replace(var.keycloak_url, "/auth", "")}"
+      }
+      env {
+        name  = "KC_HTTP_RELATIVE_PATH"
+        value = "/auth"
+      }
 
       liveness_probe {
         path                    = "/health/live"
@@ -274,6 +300,14 @@ resource "azurerm_container_app" "frontend" {
       env {
         name  = "KEYCLOAK_URL"
         value = var.keycloak_url
+      }
+      env {
+        name  = "KEYCLOAK_REALM"
+        value = "NationOH"
+      }
+      env {
+        name  = "KEYCLOAK_CLIENT_ID"
+        value = "nationoh_client"
       }
 
       liveness_probe {
