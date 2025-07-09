@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -13,25 +14,29 @@ namespace ComposedHealthBase.Server.Modules
 	{
 		public IServiceCollection RegisterModuleServices(IServiceCollection services, IConfiguration configuration)
 		{
-			services.AddDatabaseDeveloperPageExceptionFilter();
-			services.AddCors(options =>
+			services.AddDatabaseDeveloperPageExceptionFilter();		// CORS configuration - read from environment variables
+		var corsAllowedOrigins = configuration["Cors:AllowedOrigins"] ?? "http://localhost:5002";
+		var corsOrigins = corsAllowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries);
+		
+		services.AddCors(options =>
+		{
+			options.AddPolicy("Client",
+				policy => policy
+					.WithOrigins(corsOrigins)
+					.AllowAnyHeader()
+					.AllowAnyMethod()
+					.AllowCredentials());
+		});
+
+		// JWT configuration - read from IdentityConfig section
+		bool.TryParse(configuration["IdentityConfig:RequireHttpsMetadata"], out bool requireHttpsMetadata);
+
+		services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			.AddJwtBearer(options =>
 			{
-				options.AddPolicy("Client",
-					policy => policy
-						.WithOrigins("http://localhost:5002")
-						.AllowAnyHeader()
-						.AllowAnyMethod()
-						.AllowCredentials());
-			});
-
-			bool.TryParse(configuration["Jwt:RequireHttpsMetadata"], out bool requireHttpsMetadata);
-
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-				.AddJwtBearer(options =>
-				{
-					options.Authority = configuration["Jwt:Issuer"];
-					options.Audience = configuration["Jwt:Audience"];
-					options.RequireHttpsMetadata = requireHttpsMetadata;
+				options.Authority = configuration["IdentityConfig:Issuer"];
+				options.Audience = configuration["IdentityConfig:Audience"];
+				options.RequireHttpsMetadata = requireHttpsMetadata;
 					options.TokenValidationParameters = new TokenValidationParameters
 					{
 						ValidateIssuer = true,
@@ -40,28 +45,36 @@ namespace ComposedHealthBase.Server.Modules
 						ValidateIssuerSigningKey = true
 					};
 				});
-
-			services.AddAuthorization();
-			services.AddOpenApi();
+		services.AddAuthorization();
+		
+		// Add health checks for container health probes
+		services.AddHealthChecks();
+		
+		services.AddOpenApi();
 
 			return services;
 		}
 
-		public WebApplication ConfigureModuleServices(WebApplication app, bool isDevelopment)
+	public WebApplication ConfigureModuleServices(WebApplication app, bool isDevelopment)
+	{
+		app.UseCors("Client");
+		app.UseAuthentication();
+		app.UseAuthorization();
+		
+		// Map health check endpoints for container probes
+		app.MapHealthChecks("/health");
+		app.MapHealthChecks("/health/ready");
+		
+		if (isDevelopment)
 		{
-			app.UseCors("Client");
-			app.UseAuthentication();
-			app.UseAuthorization();
-			if (isDevelopment)
-			{
-				app.MapOpenApi();
-				app.MapScalarApiReference();
-			}
-			else
-			{
-				app.UseHttpsRedirection();
-			}
-			return app;
+			app.MapOpenApi();
+			app.MapScalarApiReference();
 		}
+		else
+		{
+			app.UseHttpsRedirection();
+		}
+		return app;
+	}
 	}
 }
