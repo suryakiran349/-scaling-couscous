@@ -51,7 +51,7 @@ variable "aspnetcore_environment" {
 variable "keycloak_issuer_url" {
   description = "Keycloak issuer URL"
   type        = string
-  default     = "https://auth.nohdevjun2025.uksouth.cloudapp.azure.com/realms/NationOH"
+  default     = "https://auth.nohdevjun2002.uksouth.cloudapp.azure.com/realms/NationOH"
 }
 
 variable "keycloak_features" {

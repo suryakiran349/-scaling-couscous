@@ -88,7 +88,7 @@ jobs:
               echo "RESOURCE_GROUP=nationohprod" >> $GITHUB_OUTPUT
             else
               echo "ENV_NAME=dev" >> $GITHUB_OUTPUT
-              echo "RESOURCE_GROUP=nohdevdec2029" >> $GITHUB_OUTPUT
+              echo "RESOURCE_GROUP=nohdevdec2002" >> $GITHUB_OUTPUT
             fi
           else
             # Handle branch-based triggers (workflow_run from infrastructure)
@@ -97,7 +97,7 @@ jobs:
               echo "RESOURCE_GROUP=nationohprod" >> $GITHUB_OUTPUT
             elif [[ ${{ github.ref }} == "refs/heads/master" ]] || [[ ${{ github.ref }} == "refs/heads/devops-setup" ]]; then
               echo "ENV_NAME=dev" >> $GITHUB_OUTPUT
-              echo "RESOURCE_GROUP=nohdevdec2029" >> $GITHUB_OUTPUT
+              echo "RESOURCE_GROUP=nohdevdec2002" >> $GITHUB_OUTPUT
             fi
           fi
 
