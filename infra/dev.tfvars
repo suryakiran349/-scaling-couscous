@@ -17,6 +17,7 @@ aspnetcore_environment = "Development"
 
 server_image   = "nohdevdec2002registry.azurecr.io/app.server:dev-latest"
 frontend_image = "nohdevdec2002registry.azurecr.io/app.client:dev-latest"
+
 allowed_hosts = "*"
 
 # Image Tags
