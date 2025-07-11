@@ -94,7 +94,7 @@ variable "image_tags" {
   description = "Map of image tags for each container"
   type        = map(string)
   default = {
-    keycloak = "26.1"
+    keycloak = "21.0.0"
   }
 }
 

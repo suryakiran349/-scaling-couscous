@@ -122,39 +122,39 @@ resource "azurerm_application_gateway" "app_gateway" {
     name                                = "frontend-http-settings"
     cookie_based_affinity               = "Disabled"
     port                                = 8080
-    protocol                            = "Http"
+    protocol                            = "Https"
     request_timeout                     = 60
     probe_name                          = "frontend-health-probe"
-    pick_host_name_from_backend_address = false
-    host_name                           = var.frontend_fqdn
+    pick_host_name_from_backend_address = true
+    # host_name                           = var.frontend_fqdn
   }
 
   backend_http_settings {
     name                                = "api-http-settings"
     cookie_based_affinity               = "Disabled"
     port                                = 8080
-    protocol                            = "Http"
+    protocol                            = "Https"
     request_timeout                     = 60
     probe_name                          = "api-health-probe"
-    pick_host_name_from_backend_address = false
-    host_name                           = var.api_fqdn
+    pick_host_name_from_backend_address = true
+    # host_name                           = var.api_fqdn
   }
 
   backend_http_settings {
     name                                = "auth-http-settings"
     cookie_based_affinity               = "Enabled"
     port                                = 8080
-    protocol                            = "Http"
+    protocol                            = "Https"
     request_timeout                     = 60
     probe_name                          = "auth-health-probe"
-    pick_host_name_from_backend_address = false
-    host_name                           = var.auth_fqdn
+    pick_host_name_from_backend_address = true
+    # host_name                           = var.auth_fqdn
   }
 
   # Health probes
   probe {
     name                                      = "frontend-health-probe"
-    protocol                                  = "Http"
+    protocol                                  = "Https"
     path                                      = "/health"
     interval                                  = 30
     timeout                                   = 30
@@ -164,7 +164,7 @@ resource "azurerm_application_gateway" "app_gateway" {
 
   probe {
     name                                      = "api-health-probe"
-    protocol                                  = "Http"
+    protocol                                  = "Https"
     path                                      = "/health/api"
     interval                                  = 30
     timeout                                   = 30
@@ -174,7 +174,7 @@ resource "azurerm_application_gateway" "app_gateway" {
 
   probe {
     name                                      = "auth-health-probe"
-    protocol                                  = "Http"
+    protocol                                  = "Https"
     path                                      = "/health/live"
     interval                                  = 30
     timeout                                   = 30
@@ -220,7 +220,7 @@ resource "azurerm_application_gateway" "app_gateway" {
 
     path_rule {
       name                       = "auth-rule"
-      paths                      = ["/auth/*"]
+      paths                      = ["/auth/*", "/admin/*", "/js/*", "/resources/*", "/realms/*"]
       backend_address_pool_name  = "auth-backend-pool"
       backend_http_settings_name = "auth-http-settings"
     }
