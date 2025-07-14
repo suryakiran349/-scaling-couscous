@@ -1,7 +1,7 @@
 # Development Environment Variables - Consolidated Infrastructure
 
 # Basic Configuration
-resource_group_name = "nohdevdec2003"
+resource_group_name = "nohdevdec2004"
 location            = "uksouth"
 environment         = "dev"
 
@@ -15,14 +15,14 @@ aspnetcore_environment = "Development"
 
 # Container Images (applying commit 244a9e0 changes - using actual images instead of nginx)
 
-server_image   = "nohdevdec2003registry.azurecr.io/app.server:dev-latest"
-frontend_image = "nohdevdec2003registry.azurecr.io/app.client:dev-latest"
+server_image   = "nohdevdec2004registry.azurecr.io/app.server:dev-latest"
+frontend_image = "nohdevdec2004registry.azurecr.io/app.client:dev-latest"
 
 allowed_hosts = "*"
 
 # Image Tags
 image_tags = {
-  keycloak = "20.0.0"
+  keycloak = "21.0.0"
 }
 
 # Application Gateway Configuration
